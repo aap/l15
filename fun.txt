@@ -1,0 +1,126 @@
+	elementary:
+car[x]		SUBR	x
+cdr[x]		SUBR	x
+cons[x;y]	SUBR	x
+atom[x]		SUBR	x
+eq[x;y]		SUBR	x
+equal[x;y]	SUBR	x
+list[x1;...;xn]	FSUBR	x
+null[x]		SUBR	x
+rplaca[x;y]	SUBR	x
+rplacd[x;y]	SUBR	x
+
+	logic:
+and[x1;...;xn]	FSUBR	x
+or[x1;...;xn]	FSUBR	x
+not[x]		SUBR	x
+
+	interpreter and prog
+apply[fn;args;a]	x
+eval[form;a]	x
+evlis[m;a]	x
+quote		x
+function	x
+prog		x
+go		x
+return		x
+set		x
+setq		x
+
+	definition and p-lists:
+define[x]	EXPR
+deflist[x;ind]	EXPR
+attrib[x;e]	SUBR	x
+prop[x;y;u]	SUBR	x
+get[x;y]	SUBR	x
+cset[ob;val]	EXPR	x?
+csetq[ob;val]	FEXPR	x?
+remprop[x;ind]	SUBR	x
+flag[l;ind]	EXPR
+remflag[l;ind]	EXPR
+
+	table:
+pair[x;y]	SUBR	x
+sassoc[x;y;u]	SUBR	x
+subst[x;y;z]	SUBR
+sublis[x;y]	SUBR
+
+	list:
+append[x;y]	SUBR	x
+conc[x1;...;xn]	FEXPR
+nconc[x;y]	SUBR	x
+copy[x]		SUBR	x
+reverse[l]	SUBR	x
+member[x;l]	SUBR	x
+length[x]	SUBR	x
+efface[x;l]	SUBR	x
+
+maplist[x;f]	SUBR	x
+mapcon[x;f]	SUBR	x
+map[x;f]	SUBR	x
+search[x;p;f;u]	SUBR
+
+	arithmetic:
+plus		FSUBR	x
+minus		SUBR	x
+difference	SUBR	x
+times		FSUBR	x
+add1		SUBR	x
+sub1		SUBR	x
+max		FSUBR	x
+min		FSUBR	x
+recip		SUBR	x
+quotient	SUBR	x
+remainder	SUBR	x
+divide		SUBR	x
+expt		SUBR	x
+lessp		SUBR	x
+greaterp	SUBR	x
+zerop		SUBR	x
+onep		SUBR	x
+minusp		SUBR	x
+numberp		SUBR	x
+fixp		SUBR	x
+floatp		SUBR	x
+logor		FSUBR	x
+logand		FSUBR	x
+logxor		FSUBR	x
+leftshift	SUBR	x
+array		SUBR
+
+	compiler and assembler:
+compile[x]	SUBR
+special[x]	SUBR
+unspecial[x]	SUBR
+common[x]	SUBR
+uncommon[x]	SUBR
+lap[list;table]	SUBR
+opdefine[x]	EXPR
+readlap[]	EXPR
+
+	input and output:
+read[]		SUBR	x
+print[x]	SUBR	x
+punch[x]	SUBR
+prin1[x]	SUBR	x
+terpri[]	SUBR	x
+
+	debugging etc.
+trace[x]	EXPR
+untrace[x]	EXPR
+
+	misc:
+prog2[x;y]	SUBR
+cp1[x]		SUBR
+gensym[]	SUBR
+select[q;(q1 e1);...;(qn en);e]	FEXPR
+tempus-fugit[]	SUBR
+load[]		SUBR
+plb[]		SUBR
+reclaim[]	SUBR
+pause[]		SUBR
+excise[x]	SUBR
+dump[low;high;mode;title]	SUBR
+intern[x]	SUBR
+remob[x]	SUBR
+
