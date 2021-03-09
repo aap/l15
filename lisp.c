@@ -10,7 +10,7 @@ int nargs;
 C *oblist;
 
 int gcen;
-int gcdbg = 1;
+int gcdbg;
 
 void *Atom = (void*)CAR_ATOM;
 void *Fixnum = (void*)(CAR_ATOM|CAR_FIX);
@@ -368,7 +368,11 @@ printatom(C *c)
 	if(c == nil)
 		printf("NIL");
 	else if(fixnump(c))
+#ifdef LISP32
+		printf("%d", c->fix);
+#else
 		printf("%ld", c->fix);
+#endif
 	else if(flonump(c))
 		printf("%f", c->flo);
 	else{
@@ -686,6 +690,19 @@ tail:
 }
 
 C*
+evalquote(C *fn, C *args)
+{
+	if(args != nil && (atom(args) || numberp(args)))
+		err("error: no list");
+	if(fn != nil && atom(fn) && !numberp(fn) &&
+	   (prop(fn->d, fexpr) != nil ||
+	    prop(fn->d, fsubr) != nil))
+		return eval(cons(fn, args), nil);
+	else
+		return apply(fn, args, nil);
+}
+
+C*
 evlis(C *m, C *a)
 {
 	C **p;
@@ -811,6 +828,33 @@ eval_repl(void)
 }
 
 void
+evalquote_repl(void)
+{
+	C *e, *fn, *args;
+	int spdp;
+
+	defprop(star, star, apval);
+	for(;;){
+		print(eval(star, nil));
+		printf("\n");
+		fn = readsxp();
+		if(e == noval)
+			return;
+		spdp = pdp;
+		push(fn);
+		args = readsxp();
+		if(args == noval)
+			return;
+		pdp = spdp;
+		e = evalquote(fn, args);
+		if(e == noval)
+			defprop(star, star, apval);
+		else
+			defprop(star, e, apval);
+	}
+}
+
+void
 eval_file(void)
 {
 	C *e;
@@ -839,24 +883,37 @@ load(char *filename)
 }
 
 int
-main()
+main(int argc, char *argv[])
 {
+#ifdef LISP32
+	/* only works on 32 bits */
+	assert(sizeof(void*) == 4);
+#else
 	/* only works on 64 bits */
 	assert(sizeof(void*) == 8);
+#endif
+
+	int evq = 0;
+	if(argc > 1)
+		if(strcmp(argv[1], "-q") == 0)
+			evq++;
 
 	init();
 
 	load("lib.l");
 
-	print(oblist);
-	printf("\n");
+//	print(oblist);
+//	printf("\n");
 
 	if(setjmp(tljmp))
 		printf("→\n");
 	pdp = 0;
 	memset(&temlis, 0, sizeof(temlis));
 
-	eval_repl();
+	if(evq)
+		evalquote_repl();
+	else
+		eval_repl();
 
 	return 0;
 }

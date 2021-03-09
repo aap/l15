@@ -4,7 +4,7 @@
 #include <math.h>
 
 int
-floeq(double x, double y)
+floeq(flonum x, flonum y)
 {
 	return fabs(x-y) < 0.000003;
 }
@@ -66,11 +66,15 @@ C *function_fsubr(void){
 C *car_subr(void){
 	if(alist[0] == nil)
 		return nil;
+	if(numberp(alist[0]))
+		err("error: not a pair");
 	return alist[0]->a;
 }
 C *cdr_subr(void){
 	if(alist[0] == nil)
 		return nil;
+	if(numberp(alist[0]))
+		err("error: not a pair");
 	return alist[0]->d;
 }
 C *rplaca_subr(void){

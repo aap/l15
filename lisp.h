@@ -9,7 +9,23 @@
 
 #define nil NULL
 
+#if UINTPTR_MAX == 0xFFFFFFFF
+#define LISP32
+#endif
+
 /* basic data types */
+#ifdef LISP32
+/* assume we're running on 32 bits!!! */
+typedef uintptr_t P;
+typedef uint32_t word;
+typedef int32_t fixnum;
+typedef float flonum;
+enum
+{
+	B2W = 32,	/* bits per word */
+	C2W = B2W/8,	/* character per word */
+};
+#else
 /* assume we're running on 64 bits!!! */
 typedef uintptr_t P;
 typedef uint64_t word;
@@ -20,6 +36,7 @@ enum
 	B2W = 64,	/* bits per word */
 	C2W = B2W/8,	/* character per word */
 };
+#endif
 
 
 /* static storage sizes */
