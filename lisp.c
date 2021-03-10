@@ -138,6 +138,8 @@ C*
 mkfix(fixnum fix)
 {
 	C *c;
+	if(fix >= 0 && fix < 10)
+		return digits[fix];
 	c = cons(Fixnum, nil);
 	c->fix = fix;
 	return c;
@@ -281,7 +283,9 @@ defprop(C *l, C *p, C *ind)
 	if(tt)
 		tt->a = p;
 	else
-		attrib(l, cons(ind, cons(p, nil)));
+// TODO: lisp 1.5 says new prop is added to front
+//		attrib(l, cons(ind, cons(p, nil)));
+		l->d = cons(ind, cons(p, l->d));
 	temlis.a = nil;
 	temlis.b = nil;
 	temlis.c = nil;
@@ -433,6 +437,10 @@ chsp(void)
 		return c;
 	}
 	c = getc(stdin);
+	// remove comments
+	if(c == ';')
+		while(c != '\n')
+			c = getc(stdin);
 	if(isspace(c))
 		c = ' ';
 	return c;
@@ -455,7 +463,7 @@ readnum(void)
 	fixnum dec;
 	flonum flo, fract, div;
 	int sign;
-	int nchar;
+//	int nchar;
 
 	sign = 1;
 	type = 0;	/* octal */
@@ -464,13 +472,13 @@ readnum(void)
 	flo = 0.0;
 	fract = 0.0;
 	div = 10.0;
-	nchar = 0;
+//	nchar = 0;
 
 	nextc = chsp();
 	if(nextc == '-' || nextc == '+'){
 		sign = nextc == '-' ? -1 : 1;
 		nextc = 0;
-		nchar++;
+//		nchar++;
 	}
 
 	while(c = chsp(), strchr(" ()", c) == nil && c != EOF){
@@ -488,14 +496,17 @@ readnum(void)
 			type = 1;	/* decimal */
 		}else
 			err("error: number format");
-		nchar++;
+//		nchar++;
 	}
 	nextc = c;
-	if(nchar == 1)
-		return digits[dec];
-	if(type == 0)
-		return mkfix(sign*oct);
-	if(type == 1)
+//	if(nchar == 1)
+//		return digits[dec];
+// use decimal default for now
+//	if(type == 0)
+//		return mkfix(sign*oct);
+//	if(type == 1)
+//		return mkfix(sign*dec);
+	if(type == 0 || type == 1)
 		return mkfix(sign*dec);
 	return mkflo(sign*(flo+fract));
 }
@@ -652,6 +663,7 @@ tail:
 	push(a);
 	if(atom(form->a)){
 		if(form->a == nil || numberp(form->a))
+print(form),
 			err("error: no function");
 		if(tt = prop(form->a->d, expr), tt != nil){
 			arg = evlis(form->d, a);
@@ -679,6 +691,7 @@ tail:
 			return tt;
 		}
 		if(tt = sassoc(form->a, a), tt == noval)
+print(form),
 			err("error: no function");
 		form = cons(tt->d, form->d);
 		pdp = spdp;
@@ -728,12 +741,14 @@ apply(C *fn, C *args, C *a)
 
 	if(atom(fn)){
 		if(fn == nil || numberp(fn))
+print(fn),
 			err("error: no function");
 		if(tt = prop(fn->d, expr), tt != nil)
 			return apply(tt->a, args, a);
 		if(tt = prop(fn->d, subr), tt != nil)
 			return applysubr(tt->a, args);
 		if(tt = sassoc(fn, a), tt == noval)
+print(fn),
 			err("error: no function");
 		return apply(tt->d, args, a);
 	}
@@ -798,7 +813,8 @@ init(void)
 	retrn = intern("RETURN");
 
 	for(i = 0; i < 10; i++){
-		digits[i] = mkfix(i);
+		digits[i] = cons(Fixnum, nil);
+		digits[i]->fix = i;
 		oblist = cons(digits[i], oblist);
 	}
 
@@ -831,7 +847,6 @@ void
 evalquote_repl(void)
 {
 	C *e, *fn, *args;
-	int spdp;
 
 	defprop(star, star, apval);
 	for(;;){
@@ -840,12 +855,11 @@ evalquote_repl(void)
 		fn = readsxp();
 		if(e == noval)
 			return;
-		spdp = pdp;
 		push(fn);
 		args = readsxp();
+		pop();
 		if(args == noval)
 			return;
-		pdp = spdp;
 		e = evalquote(fn, args);
 		if(e == noval)
 			defprop(star, star, apval);

@@ -12,9 +12,9 @@ floeq(flonum x, flonum y)
 int
 equal(C *a, C *b)
 {
+	if(atom(a) != atom(b))
+		return 0;
 	if(atom(a)){
-		if(!atom(b))
-			return 0;
 		if(fixnump(a))
 			return fixnump(b) &&
 				a->fix == b->fix;
@@ -58,25 +58,56 @@ C *quote_fsubr(void){
 C *function_fsubr(void){
 	if(alist[0] == nil)
 		err("error: arg count");
-	return cons(funarg, cons(alist[0]->a, alist[1]));
+	return cons(funarg, cons(alist[0]->a, cons(alist[1], nil)));
 }
 
 /* elementary functions */
 
-C *car_subr(void){
-	if(alist[0] == nil)
+C *car(C *pair){
+	if(pair == nil)
 		return nil;
-	if(numberp(alist[0]))
+	if(numberp(pair))
 		err("error: not a pair");
-	return alist[0]->a;
+	return pair->a;
 }
-C *cdr_subr(void){
-	if(alist[0] == nil)
+C *cdr(C *pair){
+	if(pair == nil)
 		return nil;
-	if(numberp(alist[0]))
+	if(numberp(pair))
 		err("error: not a pair");
-	return alist[0]->d;
+	return pair->d;
 }
+
+C *car_subr(void){ return car(alist[0]); }
+C *cdr_subr(void){ return cdr(alist[0]); }
+C *caar_subr(void){ return car(car(alist[0])); }
+C *cadr_subr(void){ return car(cdr(alist[0])); }
+C *cdar_subr(void){ return cdr(car(alist[0])); }
+C *cddr_subr(void){ return cdr(cdr(alist[0])); }
+C *caaar_subr(void){ return car(car(car(alist[0]))); }
+C *caadr_subr(void){ return car(car(cdr(alist[0]))); }
+C *cadar_subr(void){ return car(cdr(car(alist[0]))); }
+C *caddr_subr(void){ return car(cdr(cdr(alist[0]))); }
+C *cdaar_subr(void){ return cdr(car(car(alist[0]))); }
+C *cdadr_subr(void){ return cdr(car(cdr(alist[0]))); }
+C *cddar_subr(void){ return cdr(cdr(car(alist[0]))); }
+C *cdddr_subr(void){ return cdr(cdr(cdr(alist[0]))); }
+C *caaaar_subr(void){ return car(car(car(car(alist[0])))); }
+C *caaadr_subr(void){ return car(car(car(cdr(alist[0])))); }
+C *caadar_subr(void){ return car(car(cdr(car(alist[0])))); }
+C *caaddr_subr(void){ return car(car(cdr(cdr(alist[0])))); }
+C *cadaar_subr(void){ return car(cdr(car(car(alist[0])))); }
+C *cadadr_subr(void){ return car(cdr(car(cdr(alist[0])))); }
+C *caddar_subr(void){ return car(cdr(cdr(car(alist[0])))); }
+C *cadddr_subr(void){ return car(cdr(cdr(cdr(alist[0])))); }
+C *cdaaar_subr(void){ return cdr(car(car(car(alist[0])))); }
+C *cdaadr_subr(void){ return cdr(car(car(cdr(alist[0])))); }
+C *cdadar_subr(void){ return cdr(car(cdr(car(alist[0])))); }
+C *cdaddr_subr(void){ return cdr(car(cdr(cdr(alist[0])))); }
+C *cddaar_subr(void){ return cdr(cdr(car(car(alist[0])))); }
+C *cddadr_subr(void){ return cdr(cdr(car(cdr(alist[0])))); }
+C *cdddar_subr(void){ return cdr(cdr(cdr(car(alist[0])))); }
+C *cddddr_subr(void){ return cdr(cdr(cdr(cdr(alist[0])))); }
 C *rplaca_subr(void){
 	if(atom(alist[0]))
 		err("error: atom");
@@ -158,7 +189,8 @@ C *terpri_subr(void){
 C *attrib_subr(void){
 	C *l;
 	for(l = alist[0]; l != nil; l = l->d){
-		if(atom(l))
+//		if(atom(l))	// have to allow this for p-lists
+		if(numberp(l))
 			err("error: no list");
 		if(l->d == nil){
 			l->d = alist[1];
@@ -891,10 +923,37 @@ initsubr(void)
 	defprop(a, (C*)consw((word)prog_fsubr), fsubr);
 
 
-	a = intern("CAR");
-	defprop(a, mksubr(car_subr, 1), subr);
-	a = intern("CDR");
-	defprop(a, mksubr(cdr_subr, 1), subr);
+	defprop(intern("CAR"), mksubr(car_subr, 1), subr);
+	defprop(intern("CDR"), mksubr(cdr_subr, 1), subr);
+	defprop(intern("CAAR"), mksubr(caar_subr, 1), subr);
+	defprop(intern("CADR"), mksubr(cadr_subr, 1), subr);
+	defprop(intern("CDAR"), mksubr(cdar_subr, 1), subr);
+	defprop(intern("CDDR"), mksubr(cddr_subr, 1), subr);
+	defprop(intern("CAAAR"), mksubr(caaar_subr, 1), subr);
+	defprop(intern("CAADR"), mksubr(caadr_subr, 1), subr);
+	defprop(intern("CADAR"), mksubr(cadar_subr, 1), subr);
+	defprop(intern("CADDR"), mksubr(caddr_subr, 1), subr);
+	defprop(intern("CDAAR"), mksubr(cdaar_subr, 1), subr);
+	defprop(intern("CDADR"), mksubr(cdadr_subr, 1), subr);
+	defprop(intern("CDDAR"), mksubr(cddar_subr, 1), subr);
+	defprop(intern("CDDDR"), mksubr(cdddr_subr, 1), subr);
+	defprop(intern("CAAAAR"), mksubr(caaaar_subr, 1), subr);
+	defprop(intern("CAAADR"), mksubr(caaadr_subr, 1), subr);
+	defprop(intern("CAADAR"), mksubr(caadar_subr, 1), subr);
+	defprop(intern("CAADDR"), mksubr(caaddr_subr, 1), subr);
+	defprop(intern("CADAAR"), mksubr(cadaar_subr, 1), subr);
+	defprop(intern("CADADR"), mksubr(cadadr_subr, 1), subr);
+	defprop(intern("CADDAR"), mksubr(caddar_subr, 1), subr);
+	defprop(intern("CADDDR"), mksubr(cadddr_subr, 1), subr);
+	defprop(intern("CDAAAR"), mksubr(cdaaar_subr, 1), subr);
+	defprop(intern("CDAADR"), mksubr(cdaadr_subr, 1), subr);
+	defprop(intern("CDADAR"), mksubr(cdadar_subr, 1), subr);
+	defprop(intern("CDADDR"), mksubr(cdaddr_subr, 1), subr);
+	defprop(intern("CDDAAR"), mksubr(cddaar_subr, 1), subr);
+	defprop(intern("CDDADR"), mksubr(cddadr_subr, 1), subr);
+	defprop(intern("CDDDAR"), mksubr(cdddar_subr, 1), subr);
+	defprop(intern("CDDDDR"), mksubr(cddddr_subr, 1), subr);
+
 	a = intern("CONS");
 	defprop(a, mksubr(cons_subr, 2), subr);
 	a = intern("RPLACA");

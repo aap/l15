@@ -28,8 +28,8 @@ set		x
 setq		x
 
 	definition and p-lists:
-define[x]	EXPR
-deflist[x;ind]	EXPR
+define[x]	EXPR	x
+deflist[x;ind]	EXPR	x
 attrib[x;e]	SUBR	x
 prop[x;y;u]	SUBR	x
 get[x;y]	SUBR	x
